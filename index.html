@@ -1,4 +1,4 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="build" content="fluid-v3"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>증기기관차 원리 3D</title>
 <style>
 html,body{margin:0;height:100%;background:#07080b;color:#eee;font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;overflow:hidden}
@@ -177,7 +177,7 @@ add(T,box(.25,.25,.25),'brass',[-2.4,1.6,.7],null,'인젝터');
 
 /* particles */
 const NP=900;const pg=new THREE.BufferGeometry();const pp=new Float32Array(NP*3),pc=new Float32Array(NP*3);pg.setAttribute('position',new THREE.BufferAttribute(pp,3));pg.setAttribute('color',new THREE.BufferAttribute(pc,3));
-const pts=new THREE.Points(pg,new THREE.PointsMaterial({size:.05,vertexColors:true,transparent:true,opacity:.8,depthWrite:false}));scene.add(pts);pts.renderOrder=5;
+const pts=new THREE.Points(pg,new THREE.PointsMaterial({size:.05,vertexColors:true,transparent:true,opacity:.8,depthWrite:false}));pts.renderOrder=5;
 const V3=(a)=>new THREE.Vector3(...a);
 const PATH={
  fire:[[-1.9,1.3,0],[-1.6,2.0,0],[-1.15,2.05,0],[2.6,2.05,0],[3.05,2.3,0],[3.05,3.4,0]],
@@ -194,7 +194,7 @@ const PCOL={fire:[1,.45,.05],boil:[.6,.85,1],live:[1,.12,.04],sh:[1,.35,.0],in:[
 const part=[];for(let i=0;i<NP;i++)part.push({k:'fire',t:Math.random(),v:.3+Math.random()*.4,j:[(Math.random()-.5)*.15,(Math.random()-.5)*.15,(Math.random()-.5)*.15]});
 /* smoke puffs */
 const puffs=[];
-let pi_=0;function puff(){if(puffs.length<40)for(let i=0;i<40;i++){const m=new THREE.Sprite(new THREE.SpriteMaterial({map:puffTex,transparent:true,depthWrite:false,opacity:0}));m.visible=false;scene.add(m);puffs.push({m,age:9});}for(let j=0;j<3;j++){const p=puffs[pi_++%puffs.length];p.age=0;p.m.visible=true;p.m.position.set(3.05+(Math.random()-.5)*.2,BY+BR+.75+j*.1,(Math.random()-.5)*.2);p.m.material.rotation=Math.random()*6;}}
+let pi_=0;function puff(){return;if(puffs.length<40)for(let i=0;i<40;i++){const m=new THREE.Sprite(new THREE.SpriteMaterial({map:puffTex,transparent:true,depthWrite:false,opacity:0}));m.visible=false;scene.add(m);puffs.push({m,age:9});}for(let j=0;j<3;j++){const p=puffs[pi_++%puffs.length];p.age=0;p.m.visible=true;p.m.position.set(3.05+(Math.random()-.5)*.2,BY+BR+.75+j*.1,(Math.random()-.5)*.2);p.m.material.rotation=Math.random()*6;}}
 
 /* ===== fluid visuals ===== */
 const VS=`varying vec2 vUv;varying vec3 vN;varying vec3 vV;void main(){vUv=uv;vec4 mv=modelViewMatrix*vec4(position,1.);vN=normalMatrix*normal;vV=-mv.xyz;gl_Position=projectionMatrix*mv;}`;
@@ -222,10 +222,15 @@ const wMat=new THREE.ShaderMaterial({uniforms:{t:{value:0}},transparent:true,dep
  vertexShader:`uniform float t;varying vec2 vUv;varying float hgt;void main(){vUv=uv;vec3 p=position;hgt=sin(p.x*9.+t*3.)*.012+sin(p.y*13.-t*4.)*.01+sin((p.x+p.y)*21.+t*6.)*.006;p.z+=hgt;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);}`,
  fragmentShader:`varying vec2 vUv;varying float hgt;void main(){float e=smoothstep(.0,.12,min(vUv.y,1.-vUv.y));gl_FragColor=vec4(mix(vec3(.05,.35,1.),vec3(.7,.9,1.),clamp(hgt*45.+.3,0.,1.)),.85*e);}`});
 const wsurf=new THREE.Mesh(new THREE.PlaneGeometry(3.7,1.45,90,24).rotateX(-Math.PI/2),wMat);wsurf.position.set(.75,BY,0);wsurf.renderOrder=4;scene.add(wsurf);
-const bubbles=[];for(let i=0;i<45;i++){const b=new THREE.Mesh(new THREE.SphereGeometry(.025+Math.random()*.03,10,8),new THREE.MeshBasicMaterial({color:0xcfe6ff,transparent:true,opacity:.75}));b.userData={x:-1+Math.random()*3.5,z:-.55+Math.random()*1.1,y:BY-.6+Math.random()*.55,v:.2+Math.random()*.4};scene.add(b);bubbles.push(b);}
+const bubbles=[];for(let i=0;i<0;i++){const b=new THREE.Mesh(new THREE.SphereGeometry(.025+Math.random()*.03,10,8),new THREE.MeshBasicMaterial({color:0xcfe6ff,transparent:true,opacity:.75}));b.userData={x:-1+Math.random()*3.5,z:-.55+Math.random()*1.1,y:BY-.6+Math.random()*.55,v:.2+Math.random()*.4};scene.add(b);bubbles.push(b);}
 /* soft puff sprite */
 const pc2=document.createElement('canvas');pc2.width=pc2.height=128;{const g=pc2.getContext('2d');for(let i=0;i<14;i++){const x=40+Math.random()*48,y=40+Math.random()*48,r=22+Math.random()*24;const gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,'rgba(235,238,245,.55)');gr.addColorStop(1,'rgba(200,205,215,0)');g.fillStyle=gr;g.beginPath();g.arc(x,y,r,0,7);g.fill();}}
 const puffTex=new THREE.CanvasTexture(pc2);
+/* continuous smoke plume */
+{const g=new THREE.CylinderGeometry(1.1,.17,3.2,40,30,true);const uv=g.attributes.uv;for(let i=0;i<uv.count;i++){const u=uv.getX(i),v=uv.getY(i);uv.setXY(i,1-v,u);}
+ const pos=g.attributes.position;for(let i=0;i<pos.count;i++){const y=pos.getY(i)+1.6;pos.setX(i,pos.getX(i)-y*y*.12);}g.computeVertexNormals();
+ const pm=flowMat(0xc8ccd6,0x6a7388,1.6,.75,3.2);pm.blending=THREE.NormalBlending;
+ var plume=new THREE.Mesh(g,pm);plume.position.set(3.05,BY+BR+.75+1.6,0);plume.renderOrder=8;scene.add(plume);}
 /* explode init */
 for(const g of asms){if(g.userData.base.lengthSq()==0)g.userData.base.copy(g.position);}
 document.getElementById('info').textContent=`부품 ${pieces.length}개`;
@@ -266,7 +271,7 @@ addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProje
 
 /* kinematics */
 let prevP={};
-function updFluid(on,time,dt){for(const f of flows){f.visible=on;f.material.uniforms.t.value=time*(.3+speed*1.5);}
+function updFluid(on,time,dt){plume.visible=true;plume.material.uniforms.t.value=time*(.4+speed*1.6);plume.material.uniforms.a.value=running?.75:.25;for(const f of flows){f.visible=on;f.material.uniforms.t.value=time*(.3+speed*1.5);}
  wsurf.visible=on;wMat.uniforms.t.value=time;for(const b of bubbles){b.visible=on;const u=b.userData;u.y+=dt*u.v*(.5+speed);if(u.y>BY){u.y=BY-.6;u.x=-1+Math.random()*3.5;}b.position.set(u.x+Math.sin(time*3+u.z*9)*.02,u.y,u.z);}
  if(!on)return;
  for(const S of SIDES){const p=S.pist,v=p-(prevP[S.s]??p);prevP[S.s]=p;const front=S.vpos>0; // valve forward => rear port live
