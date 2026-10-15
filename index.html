@@ -15,10 +15,11 @@ button{background:rgba(255,255,255,.06);color:#ddd;border:1px solid rgba(255,255
 button.on{background:#5a3300;border-color:#ffb347;color:#fff}
 label{font-size:12px;color:#aaa;display:flex;gap:8px;align-items:center;flex:1;min-width:150px;max-width:300px}
 input[type=range]{flex:1;accent-color:#ffb347}
-@media(max-width:600px){header p{display:none}button{padding:6px 9px;font-size:11.5px}#cap{font-size:12.5px;top:70px}#info{top:40px;font-size:12px}header h1{font-size:13px}}
+#cap{font-size:17px;text-align:center}#legend{position:fixed;left:14px;top:64px;font-size:12px;line-height:1.9;background:rgba(10,12,18,.7);padding:6px 10px;border-radius:10px;border:1px solid #333}#legend i{display:inline-block;width:22px;height:9px;border-radius:5px;margin-right:6px;vertical-align:middle}
+@media(max-width:600px){header p{display:none}button{padding:6px 9px;font-size:11.5px}#cap{font-size:14px;top:70px}#legend{top:auto;bottom:190px;font-size:11px;line-height:1.6}#info{top:40px;font-size:12px}header h1{font-size:13px}}
 </style></head><body>
 <header><h1>STEAM LOCOMOTIVE · 증기기관차 원리</h1><p>불 → 증기 → 바퀴 · 드래그 회전 · 부품 터치 시 이름 표시</p></header>
-<div id="info"></div><div id="cap"></div>
+<div id="info"></div><div id="legend"><i style="background:#ffd21a"></i>불꽃·뜨거운 가스<br><i style="background:linear-gradient(90deg,#ff3a10,#ff9a20)"></i>뜨거운 증기<br><i style="background:linear-gradient(90deg,#3a7bff,#9aa6b8)"></i>다 쓴 증기(배기)<br><i style="background:#1f6fff"></i>물</div><div id="cap"></div>
 <div id="ui">
 <div class="row" id="steps"><button id="s0">원리 설명 끄기</button></div>
 <div class="row"><label>속도 <input id="spd" type="range" min="0" max="100" value="35"></label><label>분해 <input id="sl" type="range" min="0" max="100" value="0"></label></div>
@@ -55,7 +56,7 @@ const M={
  coal:()=>new THREE.MeshStandardMaterial({color:0x111111,roughness:.7,emissive:0xff4400,emissiveIntensity:0}),
  coalcold:()=>new THREE.MeshStandardMaterial({color:0x151515,roughness:.6,metalness:.2}),
  flame:()=>new THREE.MeshBasicMaterial({color:0xff8a1a,transparent:true,opacity:.75,blending:THREE.AdditiveBlending,depthWrite:false}),
- water:()=>new THREE.MeshPhysicalMaterial({color:0x2a7fff,transparent:true,opacity:.45,roughness:.1,metalness:0}),
+ water:()=>new THREE.MeshPhysicalMaterial({color:0x1f6fff,transparent:true,opacity:.6,emissive:0x0a2a80,roughness:.1,metalness:0}),
  wood:()=>new THREE.MeshStandardMaterial({color:0x5a3a22,roughness:.8}),
 };
 const GN={boiler:'보일러·화실',steam:'증기 계통',cyl:'실린더·밸브',run:'주행장치',body:'차체·운전실',tender:'텐더'};
@@ -78,7 +79,7 @@ add(B,box(1.05,.05,1.2),'iron',[-1.85,1.12,0],null,'화격자(그레이트)');
 add(B,box(.9,.06,1.1),'brick',[-1.75,2.3,0],null,'벽돌 아치');
 add(B,box(1.0,.25,1.1),'iron',[-1.85,.85,0],null,'재받이(애시팬)');
 add(B,box(.04,.4,.5),'black',[-2.52,1.5,0],null,'화구 문');
-const water=add(B,new THREE.CylinderGeometry(BR-.04,BR-.04,3.75,40,1,false,Math.PI*.5,Math.PI).rotateZ(Math.PI/2),'water',[.7,BY,0],null,'보일러 물(수위)');
+const water=add(B,new THREE.CylinderGeometry(BR-.04,BR-.04,3.75,40,1,false,Math.PI,Math.PI).rotateZ(Math.PI/2),'water',[.7,BY,0],null,'보일러 물(수위)');
 water.scale.set(1,1,1);
 add(B,box(.9,.55,1.15),'water',[-1.85,2.45,0],null,'화실 주변 물 공간');
 for(let i=0;i<16;i++){const a=i/16*Math.PI*2,rr=i%2?.42:.22;add(B,cylX(.045,3.75,10),'steel',[.7,BY-.15+Math.sin(a)*rr*.7,Math.cos(a)*rr],null,`연관(파이어 튜브) ${i+1}`);}
@@ -132,6 +133,8 @@ for(const [s,n] of [[1,'우측'],[-1,'좌측']]){const z=s*1.0;
  add(C,cylX(.32,.05,32),'steel',[CYX-.52,CY,z],null,n+' 실린더 뒤 커버');
  add(C,cylX(.05,.12,12),'brass',[CYX-.6,CY,z],null,n+' 스터핑 박스(그랜드)');
  add(C,box(1.0,.32,.36,.1),'black',[CYX,CY+.45,z],null,n+' 증기실(스팀 체스트)',true);
+ {const w=add(C,new THREE.CylinderGeometry(.3,.3,1.0,32,1,true,Math.PI/2,Math.PI).rotateZ(Math.PI/2),'iron',[CYX,CY,z],null,n+' 실린더 단면(안쪽 벽)');w.material.side=THREE.DoubleSide;w.userData.cutonly=true;
+  const w2=add(C,box(1.0,.3,.03),'iron',[CYX,CY+.45,z-.15],null,n+' 증기실 단면(안쪽 벽)');w2.userData.cutonly=true;}
  add(C,box(.06,.25,.06),'iron',[CYX+.38,CY+.18,z],null,n+' 앞 증기 포트');add(C,box(.06,.25,.06),'iron',[CYX-.38,CY+.18,z],null,n+' 뒤 증기 포트');
  add(C,box(.9,.03,.04),'steel',[CYX-1.5,CY+.12,z],null,n+' 크로스헤드 위 가이드');
  add(C,box(.9,.03,.04),'steel',[CYX-1.5,CY-.12,z],null,n+' 크로스헤드 아래 가이드');
@@ -190,28 +193,58 @@ for(const s of [1,-1])for(const f of [0,1])for(const k of ['in','out'])curves[`$
 const PCOL={fire:[1,.45,.05],boil:[.6,.85,1],live:[1,.12,.04],sh:[1,.35,.0],in:[1,.18,.0],out:[.25,.45,1]};
 const part=[];for(let i=0;i<NP;i++)part.push({k:'fire',t:Math.random(),v:.3+Math.random()*.4,j:[(Math.random()-.5)*.15,(Math.random()-.5)*.15,(Math.random()-.5)*.15]});
 /* smoke puffs */
-const puffs=[];for(let i=0;i<24;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(.3,14,10),new THREE.MeshStandardMaterial({color:0x9aa0a8,transparent:true,opacity:0,depthWrite:false,roughness:1}));m.visible=false;scene.add(m);puffs.push({m,age:9});}
-let pi_=0;function puff(){const p=puffs[pi_++%puffs.length];p.age=0;p.m.visible=true;p.m.position.set(3.05,BY+BR+.75,0);}
+const puffs=[];
+let pi_=0;function puff(){if(puffs.length<40)for(let i=0;i<40;i++){const m=new THREE.Sprite(new THREE.SpriteMaterial({map:puffTex,transparent:true,depthWrite:false,opacity:0}));m.visible=false;scene.add(m);puffs.push({m,age:9});}for(let j=0;j<3;j++){const p=puffs[pi_++%puffs.length];p.age=0;p.m.visible=true;p.m.position.set(3.05+(Math.random()-.5)*.2,BY+BR+.75+j*.1,(Math.random()-.5)*.2);p.m.material.rotation=Math.random()*6;}}
 
+/* ===== fluid visuals ===== */
+const VS=`varying vec2 vUv;varying vec3 vN;varying vec3 vV;void main(){vUv=uv;vec4 mv=modelViewMatrix*vec4(position,1.);vN=normalMatrix*normal;vV=-mv.xyz;gl_Position=projectionMatrix*mv;}`;
+const FS=`uniform float t,s,a,L;uniform vec3 c,c2;varying vec2 vUv;varying vec3 vN;varying vec3 vV;
+float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float n2(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
+void main(){vec2 p=vec2(vUv.x*L*3.-t*s,vUv.y*5.);float n=n2(p)*.6+n2(p*2.3+7.)*.4;float fr=abs(dot(normalize(vN),normalize(vV)));
+ float edge=smoothstep(0.,.6,fr);vec3 col=mix(c2,c,n);gl_FragColor=vec4(col*(.7+.8*n),a*(.25+.75*n)*edge);}`;
+const flows=[];
+function flowMat(c,c2,spd,al,L){const m=new THREE.ShaderMaterial({uniforms:{t:{value:0},s:{value:spd},a:{value:al},L:{value:L},c:{value:new THREE.Color(c)},c2:{value:new THREE.Color(c2)}},vertexShader:VS,fragmentShader:FS,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});return m;}
+function flowTube(pts,r,c,c2,spd,al){const cv=new THREE.CatmullRomCurve3(pts.map(p=>new THREE.Vector3(...p)));const L=cv.getLength();const m=new THREE.Mesh(new THREE.TubeGeometry(cv,64,r,16),flowMat(c,c2,spd,al,L));m.renderOrder=6;scene.add(m);flows.push(m);return m;}
+const FL={};
+FL.fire=[-.18,0,.18].map(dz=>flowTube([[-1.9,1.3,dz],[-1.75,2.0,dz],[-1.15,2.0+dz*.4,dz*1.4],[2.6,2.0+dz*.4,dz*1.4],[3.05,2.25,dz*.5],[3.05,3.3,0]],.07,0xffe040,0xff7a10,3.5,.9));
+FL.boil=flowTube([[.6,2.2,0],[.6,2.9,0],[.6,3.15,0]],.16,0xffffff,0xffa060,1.5,.5);
+FL.live=flowTube([[.6,3.0,0],[.6,2.72,0],[.9,2.7,0],[3.0,2.7,0],[3.05,2.45,0]],.07,0xff5a10,0xff2a00,2.5,.95);
+FL.sh=flowTube([[3.05,2.45,0],[.7,2.4,0],[.5,2.4,0],[3.0,2.55,0]],.05,0xffa020,0xff4a00,2.5,.8);
+for(const S of SIDES){const s=S.s,z=S.z;
+ S.fin=flowTube([[3.05,2.5,s*.25],[3.15,1.7,s*.7],[3.0,1.35,z],[CYX,CY+.45,z]],.06,0xff5a10,0xff2a00,2.5,.95);
+ S.fout=flowTube([[CYX,CY+.45,z],[2.85,.75,s*.82],[3.0,1.0,s*.5],[3.05,1.6,0],[3.05,2.4,0],[3.05,3.4,0]],.07,0x6aa8ff,0x8a96a8,3,.85);
+ S.chest=new THREE.Mesh(new THREE.BoxGeometry(.9,.22,.24),flowMat(0xff5a10,0xff2a00,1.5,.8,1));S.chest.position.set(CYX,CY+.45,z);scene.add(S.chest);flows.push(S.chest);
+ S.chF=new THREE.Mesh(cylX(.27,1,24),flowMat(0xff6a10,0xff2000,2,.9,1));S.chR=new THREE.Mesh(cylX(.27,1,24),flowMat(0xff6a10,0xff2000,2,.9,1));
+ for(const m of [S.chF,S.chR]){m.renderOrder=7;scene.add(m);flows.push(m);}}
+/* water surface + bubbles */
+const wMat=new THREE.ShaderMaterial({uniforms:{t:{value:0}},transparent:true,depthWrite:false,side:THREE.DoubleSide,
+ vertexShader:`uniform float t;varying vec2 vUv;varying float hgt;void main(){vUv=uv;vec3 p=position;hgt=sin(p.x*9.+t*3.)*.012+sin(p.y*13.-t*4.)*.01+sin((p.x+p.y)*21.+t*6.)*.006;p.z+=hgt;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);}`,
+ fragmentShader:`varying vec2 vUv;varying float hgt;void main(){float e=smoothstep(.0,.12,min(vUv.y,1.-vUv.y));gl_FragColor=vec4(mix(vec3(.05,.35,1.),vec3(.7,.9,1.),clamp(hgt*45.+.3,0.,1.)),.85*e);}`});
+const wsurf=new THREE.Mesh(new THREE.PlaneGeometry(3.7,1.45,90,24).rotateX(-Math.PI/2),wMat);wsurf.position.set(.75,BY,0);wsurf.renderOrder=4;scene.add(wsurf);
+const bubbles=[];for(let i=0;i<45;i++){const b=new THREE.Mesh(new THREE.SphereGeometry(.025+Math.random()*.03,10,8),new THREE.MeshBasicMaterial({color:0xcfe6ff,transparent:true,opacity:.75}));b.userData={x:-1+Math.random()*3.5,z:-.55+Math.random()*1.1,y:BY-.6+Math.random()*.55,v:.2+Math.random()*.4};scene.add(b);bubbles.push(b);}
+/* soft puff sprite */
+const pc2=document.createElement('canvas');pc2.width=pc2.height=128;{const g=pc2.getContext('2d');for(let i=0;i<14;i++){const x=40+Math.random()*48,y=40+Math.random()*48,r=22+Math.random()*24;const gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,'rgba(235,238,245,.55)');gr.addColorStop(1,'rgba(200,205,215,0)');g.fillStyle=gr;g.beginPath();g.arc(x,y,r,0,7);g.fill();}}
+const puffTex=new THREE.CanvasTexture(pc2);
 /* explode init */
 for(const g of asms){if(g.userData.base.lengthSq()==0)g.userData.base.copy(g.position);}
 document.getElementById('info').textContent=`부품 ${pieces.length}개`;
 
 /* steps */
 const STEPS=[
- {t:'① 석탄 연소',c:'기관사가 화실에 석탄을 넣으면 화격자 위에서 석탄이 타며 1,000℃가 넘는 뜨거운 가스를 만듭니다. 아래 재받이로 공기가 들어와 불을 살립니다.',k:['석탄','불꽃','화격자','화실','재받이','벽돌 아치','화구'],cam:[-1.0,2.6,4.2],tg:[-1.9,1.6,0]},
- {t:'② 물 끓여 증기 생성',c:'뜨거운 가스는 보일러 속 수십 개의 연관(파이어 튜브)을 지나며 주변의 물을 데웁니다. 끓은 물은 고압 증기가 되어 보일러 윗부분에 모입니다.',k:['연관','보일러 물','화실 주변 물','보일러 동체','수면계'],cam:[1,3.6,5.2],tg:[.6,2.1,0]},
- {t:'③ 증기 조절·과열',c:'가장 높은 증기 돔에서 마른 증기를 레귤레이터(스로틀) 밸브로 받아 드라이 파이프로 보냅니다. 과열관을 한 번 더 지나며 더 뜨거운 과열 증기가 됩니다.',k:['증기 돔','레귤레이터','드라이 파이프','과열','증기관'],cam:[2.2,4.4,4.2],tg:[1.6,2.6,0]},
- {t:'④ 실린더에 증기 공급·피스톤 왕복',c:'증기실의 피스톤 밸브가 앞뒤로 움직이며 증기를 피스톤의 앞쪽과 뒤쪽에 번갈아 넣습니다. 증기가 팽창하며 피스톤을 밀고, 밸브는 피스톤보다 약 90° 앞서 움직입니다.',k:['실린더','피스톤','증기실','피스톤 밸브','밸브 헤드','포트','스핀들','콤비네이션','래디어스','익스팬션','편심'],cam:[4.0,1.7,4.8],tg:[2.8,.95,1.0]},
- {t:'⑤ 연결봉으로 바퀴 회전',c:'피스톤 로드 → 크로스헤드 → 메인로드가 왕복 운동을 동륜 크랭크 핀의 회전 운동으로 바꿉니다. 커플링 로드가 세 동륜을 함께 돌리고, 좌우 실린더는 90° 어긋나 언제나 출발할 수 있습니다.',k:['메인로드','커플링','크랭크 핀','크로스헤드','피스톤 로드','동륜'],cam:[0.6,1.6,5.2],tg:[.6,.8,.9]},
- {t:'⑥ 배기 증기가 굴뚝으로, 통풍 강화',c:'일을 마친 증기는 블라스트파이프에서 굴뚝으로 힘차게 뿜어집니다. 이 분출이 연실의 공기를 빨아내 화실로 더 많은 공기를 끌어들여 불을 더 세게 만듭니다. 칙칙폭폭 소리의 정체입니다.',k:['블라스트','굴뚝','연실','페티코트','배기관'],cam:[5.2,3.6,3.2],tg:[3.05,2.3,0]},
+ {t:'① 석탄 연소',c:'화실에서 석탄이 타며 뜨거운 불길(노랑)을 만듭니다.',k:['석탄','불꽃','화격자','화실','재받이','벽돌 아치','화구'],cam:[-1.6,1.8,6.0],tg:[-1.6,1.6,0]},
+ {t:'② 물 끓여 증기 생성',c:'불길이 보일러 속 관을 지나며 물(파랑)을 끓여 증기를 만듭니다.',k:['연관','보일러 물','화실 주변 물','보일러 동체','수면계'],cam:[.6,3.6,8.0],tg:[.6,2.0,0]},
+ {t:'③ 증기 조절·과열',c:'모인 증기는 스로틀 밸브를 지나 한 번 더 데워져 아주 뜨거워집니다(주황).',k:['증기 돔','레귤레이터','드라이 파이프','과열','증기관'],cam:[1.6,2.6,8.5],tg:[1.6,2.3,0]},
+ {t:'④ 실린더에 증기 공급·피스톤 왕복',c:'뜨거운 증기(주황)가 피스톤 한쪽을 밀고, 반대쪽의 다 쓴 증기(파랑)는 빠져나갑니다.',k:['실린더','피스톤','증기실','피스톤 밸브','밸브 헤드','포트','스핀들','콤비네이션','래디어스','익스팬션','편심'],cam:[2.55,1.0,4.3],tg:[2.55,.95,1.0]},
+ {t:'⑤ 연결봉으로 바퀴 회전',c:'피스톤의 앞뒤 움직임이 막대를 통해 바퀴를 돌립니다.',k:['메인로드','커플링','크랭크 핀','크로스헤드','피스톤 로드','동륜'],cam:[.3,1.1,7.0],tg:[.3,.9,0]},
+ {t:'⑥ 배기 증기가 굴뚝으로, 통풍 강화',c:'다 쓴 증기가 굴뚝으로 뿜어지며 불에 공기를 더 빨아들입니다.',k:['블라스트','굴뚝','연실','페티코트','배기관'],cam:[2.6,2.6,8.5],tg:[2.6,2.6,0]},
 ];
 let step=-1,cut=false,running=true,speed=.35,target=0,cur=0,sel=null;
 const cap=document.getElementById('cap'),sdiv=document.getElementById('steps');
 STEPS.forEach((S,i)=>{const b=document.createElement('button');b.textContent=S.t;b.onclick=()=>setStep(i);sdiv.insertBefore(b,document.getElementById('s0'));});
 const camTo={p:null,t:null};
 function setStep(i){step=i;sdiv.querySelectorAll('button').forEach((b,j)=>b.classList.toggle('on',j==i));
- if(i<0){cap.style.display='none';return;}const S=STEPS[i];cap.innerHTML=`<b>${S.t}</b><br>${S.c}`;cap.style.display='block';setCut(true);
+ if(i<0){cap.style.display='none';return;}const S=STEPS[i];cap.innerHTML=`<b>${S.t}</b> ${S.c}`;cap.style.display='block';setCut(true);
  const k=Math.max(1,2/(innerWidth/innerHeight));const tg=V3(S.tg),p=V3(S.cam);camTo.p=tg.clone().add(p.sub(tg).multiplyScalar(k));camTo.t=tg;}
 document.getElementById('s0').onclick=()=>setStep(-1);
 function setCut(v){cut=v;document.getElementById('cut').classList.toggle('on',v);}
@@ -232,6 +265,17 @@ R.domElement.addEventListener('pointerup',e=>{if(!down||Math.hypot(e.clientX-dow
 addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();R.setSize(innerWidth,innerHeight);});
 
 /* kinematics */
+let prevP={};
+function updFluid(on,time,dt){for(const f of flows){f.visible=on;f.material.uniforms.t.value=time*(.3+speed*1.5);}
+ wsurf.visible=on;wMat.uniforms.t.value=time;for(const b of bubbles){b.visible=on;const u=b.userData;u.y+=dt*u.v*(.5+speed);if(u.y>BY){u.y=BY-.6;u.x=-1+Math.random()*3.5;}b.position.set(u.x+Math.sin(time*3+u.z*9)*.02,u.y,u.z);}
+ if(!on)return;
+ for(const S of SIDES){const p=S.pist,v=p-(prevP[S.s]??p);prevP[S.s]=p;const front=S.vpos>0; // valve forward => rear port live
+  const fwd=v>=0; // piston moving forward => rear chamber pushes
+  const rearL=Math.max(.02,(p-.05)-(CYX-.47)),frontL=Math.max(.02,(CYX+.47)-(p+.05));
+  S.chR.scale.set(rearL,1,1);S.chR.position.set(CYX-.47+rearL/2,CY,S.z);S.chF.scale.set(frontL,1,1);S.chF.position.set(CYX+.47-frontL/2,CY,S.z);
+  const hot=new THREE.Color(0xff5a10),hot2=new THREE.Color(0xff1a00),cold=new THREE.Color(0x4a8aff),cold2=new THREE.Color(0x8a96a8);
+  const [hc,cc]=fwd?[S.chR,S.chF]:[S.chF,S.chR];hc.material.uniforms.c.value.copy(hot);hc.material.uniforms.c2.value.copy(hot2);hc.material.uniforms.a.value=1;
+  cc.material.uniforms.c.value.copy(cold);cc.material.uniforms.c2.value.copy(cold2);cc.material.uniforms.a.value=.7;}}
 let th=0,lastQ=0,clock=new THREE.Clock(),T0=0;
 const tmp=new THREE.Vector3();
 function rodBetween(g,a,b){g.position.set((a.x+b.x)/2,(a.y+b.y)/2,a.z);g.rotation.z=Math.atan2(b.y-a.y,b.x-a.x);g.scale.x=1;}
@@ -278,7 +322,7 @@ R.setAnimationLoop(()=>{const dt=Math.min(clock.getDelta(),.05),time=clock.elaps
  kin();
  // puffs: 4 per rev
  const qn=Math.floor(-th/(Math.PI/2));if(qn!=lastQ){lastQ=qn;if(running&&speed>0)puff();}
- for(const p of puffs){if(p.age>8)continue;p.age+=dt;const a=p.age;p.m.position.y+=dt*(1.6-a*.3);p.m.position.x-=dt*speed*3;p.m.scale.setScalar(.6+a*1.2);p.m.material.opacity=Math.max(0,.55-a*.18);if(a>3)p.m.visible=false;}
+ for(const p of puffs){if(p.age>8)continue;p.age+=dt;const a=p.age;p.m.position.y+=dt*(1.6-a*.3);p.m.position.x-=dt*speed*3;p.m.scale.setScalar(.5+a*1.5);p.m.material.opacity=Math.max(0,.9-a*.3);p.m.material.rotation+=dt*.3;if(a>3)p.m.visible=false;}
  // fire
  const ff=running?1:.6;coals.forEach((c,i)=>c.material.emissiveIntensity=(1.2+Math.sin(time*6+i)*.5)*ff);
  flames.forEach(f=>{const k=.7+.4*Math.sin(time*13+f.userData.ph)+.2*Math.sin(time*7.3+f.userData.ph*2);f.scale.set(1,k*(.6+speed),1);f.position.y=1.45+k*.12;});
@@ -288,10 +332,13 @@ R.setAnimationLoop(()=>{const dt=Math.min(clock.getDelta(),.05),time=clock.elaps
  for(const p of pieces){const u=p.userData;let o=1;if(cut&&u.shell)o=.12;
   const hl=hk&&hk.some(k=>u.name.includes(k));if(hl&&u.shell)o=.3;if(hk&&!hl&&!u.name.includes('석탄')&&!u.name.includes('불꽃'))o=Math.min(o,u.shell?.08:.35);
   if(p.material.opacity!==undefined&&!u.name.includes('불꽃')&&!u.name.includes('물')){p.material.transparent=o<1||u.shell;p.material.opacity=o;p.material.depthWrite=o>.5;}
-  if(u.em0&&!u.name.includes('석탄')){if(hl)p.material.emissive.setRGB(.12+.08*Math.sin(time*5),.05,0);else if(p==sel)p.material.emissive.setHex(0x553300);else p.material.emissive.copy(u.em0);}}
+  if(u.cutonly)p.visible=cut;
+  if(step==3&&u.name.startsWith('우측')&&/동륜|메인로드|커플링|리턴|편심|익스팬션|다이|래디어스|콤비네이션|유니온|선도|가이드/.test(u.name))p.visible=false;else if(!u.cutonly)p.visible=true;
+  if(step==3&&u.name.startsWith('우측')&&/피스톤|크로스헤드|밸브 헤드/.test(u.name)){p.material.emissive&&p.material.emissive.setRGB(.35,.35,.4);o=1;p.material.opacity=1;continue;}
+  if(u.em0&&!u.name.includes('석탄')&&!u.name.includes('물')){if(hl)p.material.emissive.setRGB(.12+.08*Math.sin(time*5),.05,0);else if(p==sel)p.material.emissive.setHex(0x553300);else p.material.emissive.copy(u.em0);}}
  // particles
- const show=cut||step>=0;pts.visible=show&&curT<.05;
- if(pts.visible){for(let i=0;i<NP;i++){const P=part[i];P.t+=dt*P.v*(.25+speed*1.2);
+ const show=cut||step>=0;pts.visible=false;updFluid(show&&curT<.05,time,dt);
+ if(false){for(let i=0;i<NP;i++){const P=part[i];P.t+=dt*P.v*(.25+speed*1.2);
   if(P.t>1){P.t=0;const r=Math.random();const sd=Math.random()<.5?1:-1,S=SIDES[sd>0?0:1];const front=S.vpos>0;
    P.k=r<.15?'fire':r<.23?'boil':r<.33?'live':r<.4?'sh':r<.72?`in${sd}${front?1:0}`:`out${sd}${front?0:1}`;}
   const cv=curves[P.k];cv.getPoint(P.t,tmp);pp[i*3]=tmp.x+P.j[0];pp[i*3+1]=tmp.y+P.j[1];pp[i*3+2]=tmp.z+P.j[2];
